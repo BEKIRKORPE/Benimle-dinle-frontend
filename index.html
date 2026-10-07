@@ -4038,4 +4038,28 @@ function getMyDiscoverEntry(){
   };
 })();
 </script>
+<!-- ===== Benimle Dinle: hesap silme yaması (Eki 2026) =====
+     index.html'de </body> etiketinin HEMEN ÖNÜNE yapıştırılır.
+     Eski (sadece cihazdan silen) deleteAccount()'un yerine geçer. -->
+<script>
+(function(){
+  function bdAuthHeaders(){return {'Content-Type':'application/json','x-auth-token':localStorage.getItem('bd_auth_token')||''}}
+
+  // Hesabı SUNUCUDAN da gerçekten siler (Play hesap silme şartı)
+  window.deleteAccount=async function(){
+    if(!confirm('Hesabını silmek üzeresin.\n\nProfilin, fotoğrafların, mesajların, arkadaşlıkların ve jeton bakiyen sunucudan KALICI olarak silinir. Geri alınamaz.\n\nDevam etmek istiyor musun?'))return;
+    var token=localStorage.getItem('bd_auth_token');
+    if(token){
+      try{
+        var r=await fetch(BACKEND_URL+'/api/account/delete',{method:'POST',headers:bdAuthHeaders(),body:'{}'});
+        if(!r.ok&&r.status!==404){var d=await r.json().catch(function(){return {}});toast('⚠️ Hesap silinemedi: '+(d.error||('hata '+r.status)));return}
+      }catch(e){toast('⚠️ Sunucuya ulaşılamadı, hesap silinemedi. İnternetini kontrol edip tekrar dene.');return}
+    }
+    Object.keys(localStorage).filter(function(k){return k.indexOf('bd_')===0}).forEach(function(k){localStorage.removeItem(k)});
+    alert('Hesabın silindi.');
+    location.reload();
+  };
+})();
+</script>
+
 </body></html>

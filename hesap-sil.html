@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Benimle Dinle — Hesap Silme</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f4f1ff;color:#222;margin:0;padding:24px}
+  .k{max-width:460px;margin:0 auto;background:#fff;border-radius:14px;padding:24px;box-shadow:0 4px 18px rgba(0,0,0,.08)}
+  h1{color:#7B4DFF;font-size:22px;margin-top:0}
+  label{display:block;font-size:14px;margin:14px 0 4px}
+  input{width:100%;box-sizing:border-box;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:16px}
+  button{margin-top:18px;width:100%;padding:13px;border:0;border-radius:8px;background:#d93025;color:#fff;font-size:16px;cursor:pointer}
+  button:disabled{opacity:.6}
+  .not{font-size:13px;color:#555;line-height:1.5}
+  #m{margin-top:14px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="k">
+  <h1>Benimle Dinle — Hesap Silme</h1>
+  <p class="not">Bu sayfadan Benimle Dinle hesabını ve sana ait verileri kalıcı olarak silebilirsin. Aynı işlemi uygulama içinde <b>Profil → Hesabı Sil</b> bölümünden de yapabilirsin.</p>
+  <p class="not"><b>Silinenler:</b> hesap ve profil bilgileri (ad, fotoğraf, şehir, yaş vb.), özel mesajlar ve sesli mesajlar, grup mesajları, arkadaşlık istekleri, beğeniler, müzik yorumları, engelleme ve şikâyet kayıtları, jeton bakiyesi.<br>
+  <b>Saklananlar:</b> yasal zorunluluk nedeniyle satın alma ve para çekme kayıtları (kimlik bilgilerinden arındırılmış hediye kayıtları dahil) en fazla 10 yıl saklanır.<br>
+  Silme işlemi anında yapılır ve geri alınamaz.</p>
+  <label for="t">Kayıtlı telefon numaran</label>
+  <input id="t" type="tel" placeholder="05xx xxx xx xx" autocomplete="tel">
+  <label for="p">Parolan</label>
+  <input id="p" type="password" autocomplete="current-password">
+  <button id="b">Hesabımı kalıcı olarak sil</button>
+  <div id="m"></div>
+  <p class="not" style="margin-top:20px">Parolanı hatırlamıyorsan veya sorun yaşarsan: <a href="mailto:korpe.bekir71@gmail.com?subject=Benimle%20Dinle%20hesap%20silme">korpe.bekir71@gmail.com</a> (kayıtlı telefon numaranı yaz, en geç 7 gün içinde silinir).</p>
+</div>
+<script>
+document.getElementById('b').onclick=async function(){
+  var m=document.getElementById('m'),b=this;
+  var phone=document.getElementById('t').value.trim(),password=document.getElementById('p').value;
+  if(!phone||!password){m.style.color='#d93025';m.textContent='Telefon ve parola gerekli.';return}
+  if(!confirm('Hesabın ve tüm verilerin kalıcı olarak silinecek. Emin misin?'))return;
+  b.disabled=true;m.style.color='#555';m.textContent='Siliniyor...';
+  try{
+    var r=await fetch('https://benimle-dinle-backend.onrender.com/api/account/delete-web',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:phone,password:password})});
+    var d=await r.json().catch(function(){return {}});
+    if(r.ok&&d.success){m.style.color='#188038';m.textContent='✅ Hesabın ve verilerin silindi.';}
+    else{m.style.color='#d93025';m.textContent='⚠️ '+(d.error||('Hata: '+r.status));b.disabled=false}
+  }catch(e){m.style.color='#d93025';m.textContent='⚠️ Sunucuya ulaşılamadı. Sunucu uyanıyor olabilir, 30 saniye sonra tekrar dene.';b.disabled=false}
+};
+</script>
+</body>
+</html>
